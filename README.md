@@ -1,58 +1,43 @@
 # HUD Dashboard Extension for pi-coding-agent
 
+[English](#english) | [한국어](#한국어)
+
+---
+
+## English
+
 An interactive HUD (Heads-Up Display) extension for the [pi coding agent](https://github.com/badlogic/pi-mono) that provides real-time monitoring of agentic workflow status.
 
-## Features
+### Features
 
-### 🎯 Real-time Workflow Tracking
+#### 🎯 Real-time Workflow Tracking
 - **Status indicators**: Idle, Thinking, Planning, Executing, Error, Completed
 - **Animated spinners**: Visual feedback during active states
 - **Connection monitoring**: Heartbeat-based provider connectivity check
 
-### 🔧 Tool Execution Monitoring
+#### 🔧 Tool Execution Monitoring
 - **Live tool call tracking**: See which tools are running, pending, or completed
 - **Execution timing**: Track when tools start and finish
 - **Error highlighting**: Visual indicators for failed tool executions
 
-### 📊 Metrics Dashboard
+#### 📊 Metrics Dashboard
 - **Turn count**: Number of agent turns in the session
 - **Tools executed**: Total tools run since session start
 - **Error rate**: Percentage of failed tool executions
 - **Session duration**: Time since the HUD was initialized
 
-### 🔒 Security Hardening (Phase 2B)
+#### 🔒 Security & Reliability
 - **Secret redaction**: Automatically masks API keys, tokens, and credentials
-- **Content sanitization**: XSS prevention for displayed content
-- **IPC message signing**: Integrity verification for inter-process messages
-- **Permission model**: Granular access control for extension features
-
-### ⚡ State Synchronization (Phase 3)
-- **Optimistic updates**: Immediate UI feedback with automatic rollback on failure
-- **Debounced reconciliation**: Batch state changes to prevent thrashing
-- **Atomic mutations**: Thread-safe state updates
 - **Heartbeat monitoring**: Automatic detection of provider disconnections
+- **State synchronization**: Optimistic updates and debounced reconciliation
 
-### 🎨 UX Polish (Phase 4)
-- **Context-aware display**: Widgets adapt based on current workflow state
-- **Collapsible panels**: Minimize widgets to reduce cognitive load
-- **Preference persistence**: Your settings are saved across sessions
-- **State indicators**: Loading, success, error, and info toasts
-
-## Installation
-
-### Prerequisites
-- [pi-coding-agent](https://github.com/badlogic/pi-mono) installed
-- [engineering-discipline skills](https://github.com/tmdgusya/engineering-discipline) installed
-
-### Install HUD Dashboard
+### Installation
 
 ```bash
-pi install git:github.com/tmdgusya/pi-engineering-discipline-extension
+pi install git:github.com/tmdgusya/hud-dashboard
 ```
 
-This extension will be auto-discovered from `~/.pi/agent/extensions/`.
-
-## Commands
+### Commands
 
 | Command | Description |
 |---------|-------------|
@@ -63,72 +48,52 @@ This extension will be auto-discovered from `~/.pi/agent/extensions/`.
 | `/hud-minimize` | Minimize or restore the HUD dashboard |
 | `/hud-reset` | Reset HUD state to defaults |
 
-## Architecture
+---
 
-The extension follows a phased implementation based on the ultraplan milestone DAG:
+## 한국어
 
+[pi coding agent](https://github.com/badlogic/pi-mono)를 위한 대화형 HUD(Heads-Up Display) 확장 프로그램입니다. 에이전트의 워크플로우 상태를 실시간으로 모니터링할 수 있는 대시보드를 제공합니다.
+
+### 주요 기능
+
+#### 🎯 실시간 워크플로우 추적
+- **상태 표시**: Idle, Thinking, Planning, Executing, Error, Completed 상태 시각화
+- **애니메이션 스피너**: 에이전트가 활동 중일 때 시각적 피드백 제공
+- **연결 모니터링**: 하트비트(Heartbeat) 기반의 프로바이더 연결 상태 체크
+
+#### 🔧 도구 실행 모니터링
+- **실시간 도구 호출 추적**: 실행 중, 대기 중, 완료된 도구 호출 표시
+- **실행 시간 기록**: 도구 실행 시작 및 종료 시간 추적
+- **에러 하이라이트**: 실패한 도구 실행에 대한 시각적 표시
+
+#### 📊 메트릭 대시보드
+- **턴 횟수**: 세션 내 에이전트 턴 수 카운트
+- **도구 실행 수**: 세션 시작 이후 실행된 총 도구 수
+- **에러율**: 실패한 도구 실행 비율(%) 계산
+- **세션 지속 시간**: HUD 초기화 이후 경과 시간 표시
+
+#### 🔒 보안 및 안정성
+- **민감 정보 마스킹**: API 키, 토큰, 비밀번호 등을 자동으로 감지하여 가림 처리
+- **하트비트 감시**: 프로바이더와의 연결 끊김을 자동으로 감지
+- **상태 동기화**: 낙관적 업데이트(Optimistic updates) 및 디바운스된 상태 조정 로직 적용
+
+### 설치 방법
+
+```bash
+pi install git:github.com/tmdgusya/hud-dashboard
 ```
-Phase 0: Foundation (Extension scaffold, version checks)
-    │
-    ▼
-Phase 1: Core State Management (Immutable store, memory cap)
-    │
-    ├──────┬──────┬──────┐
-    ▼      ▼      ▼
-Phase 2A  Phase 2B  Phase 2C
-EventBus  Security  UI Core
-    │      │      │
-    └──────┴──────┘
-              │
-              ▼
-         Phase 3: Real-time Sync (Optimistic updates, heartbeat)
-              │
-              ▼
-         Phase 4: UX Polish (Context-aware, persistence)
-              │
-              ▼
-         Phase 5: Integration & Hardening
-```
 
-## Security Notes
+### 명령어 안내
 
-The HUD Dashboard implements several security measures:
-
-1. **Secret Redaction**: Patterns matching `API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`, etc. are automatically redacted before display.
-
-2. **Content Sanitization**: All displayed text is escaped to prevent XSS attacks.
-
-3. **Permission Model**: The extension uses time-limited permission grants that auto-expire.
-
-4. **Security Audit Log**: All security-relevant events are logged for review.
-
-## Development
-
-To modify or extend this extension:
-
-1. Clone the extension:
-   ```bash
-   git clone https://github.com/tmdgusya/pi-engineering-discipline-extension.git
-   cd pi-engineering-discipline-extension/extensions/hud-dashboard
-   ```
-
-2. The extension is structured as follows:
-   ```
-   src/
-   ├── index.ts        # Main entry point
-   ├── state.ts        # Phase 1: Immutable state store
-   ├── eventBus.ts     # Phase 2A: Pub/sub event system
-   ├── security.ts     # Phase 2B: Secret redaction, sanitization
-   ├── ui.ts           # Phase 2C: Widget registry, renderers
-   ├── sync.ts         # Phase 3: Optimistic updates, reconciliation
-   └── preferences.ts  # Phase 4: Context-aware display, persistence
-   ```
-
-3. TypeScript compilation check:
-   ```bash
-   npm run build
-   ```
+| 명령어 | 설명 |
+|---------|-------------|
+| `/hud-help` | HUD 대시보드 도움말 표시 |
+| `/hud-status` | 현재 HUD 상태(워크플로우, 도구, 에러, 하트비트 등) 요약 표시 |
+| `/hud-metrics` | 메트릭 위젯 표시 여부 전환 |
+| `/hud-tools` | 도구 목록 위젯 표시 여부 전환 |
+| `/hud-minimize` | HUD 대시보드 최소화 또는 복원 |
+| `/hud-reset` | HUD 상태를 기본값으로 리셋 |
 
 ## License
 
-MIT - See [engineering-discipline](https://github.com/tmdgusya/engineering-discipline)
+MIT
