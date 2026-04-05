@@ -25,6 +25,21 @@ export default function hudDashboardExtension(pi: ExtensionAPI): void {
     indicatorManager.show("info", `Workflow started: ${(event.payload as any).status}`);
   });
 
+  const updateContextUsage = (ctx: any) => {
+    const usage = ctx.getContextUsage();
+    if (usage) {
+      hudActions.setContextUsage(usage);
+    }
+  };
+
+  pi.on("turn_end", async (_event, ctx) => {
+    updateContextUsage(ctx);
+  });
+
+  pi.on("agent_end", async (_event, ctx) => {
+    updateContextUsage(ctx);
+  });
+
   hudEventBus.subscribe("workflow:end", (event) => {
     if ((event.payload as any).status === "completed") {
       indicatorManager.show("success", "Workflow completed");

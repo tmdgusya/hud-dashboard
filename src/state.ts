@@ -20,11 +20,18 @@ export interface AgentMetrics {
   startTime: number;
 }
 
+export interface ContextUsage {
+  tokens: number | null;
+  contextWindow: number;
+  percent: number | null;
+}
+
 export interface HUDState {
   workflowStatus: WorkflowStatus;
   currentGoal: string;
   activeToolCalls: ToolExecution[];
   metrics: AgentMetrics;
+  contextUsage: ContextUsage | null;
   showStatusBar: boolean;
   showMetrics: boolean;
   showToolList: boolean;
@@ -92,6 +99,7 @@ const initialState: HUDState = {
     errorsCount: 0,
     startTime: Date.now(),
   },
+  contextUsage: null,
   showStatusBar: true,
   showMetrics: false,
   showToolList: true,
@@ -187,6 +195,10 @@ export const hudActions = {
       providerConnected: connected,
       lastHeartbeat: Date.now()
     }));
+  },
+
+  setContextUsage(usage: ContextUsage | null): void {
+    hudStore.setState(s => ({ ...s, contextUsage: usage }));
   },
 
   heartbeat(): void {

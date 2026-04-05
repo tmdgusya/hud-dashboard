@@ -134,7 +134,16 @@ export class HUDDashboardRenderer {
       ? this.theme.fg("success", "●")
       : this.theme.fg("error", "○");
 
-    return [`│  ${spinner} ${statusIcon} ${statusText}    ${connIcon} Connected`];
+    let contextBar = "";
+    if (state.contextUsage && state.contextUsage.percent !== null) {
+      const { percent } = state.contextUsage;
+      const color = percent > 90 ? "error" : percent > 70 ? "warning" : "success";
+      const filled = Math.round((percent / 100) * 10);
+      const bar = "█".repeat(filled).padEnd(10, "░");
+      contextBar = `  Ctx: [${this.theme.fg(color, bar)}]`;
+    }
+
+    return [`│  ${spinner} ${statusIcon} ${statusText}    ${connIcon} Connected${contextBar}`];
   }
 
   renderStatusWidget(state: HUDState): string[] {
@@ -154,15 +163,28 @@ export class HUDDashboardRenderer {
   }
 
   renderMetricsWidget(state: HUDState): string[] {
-    const { metrics } = state;
+    const { metrics, contextUsage } = state;
     const errorRate = hudSelectors.getErrorRate();
 
-    return [
+    const lines = [
       `│    Turns: ${this.theme.fg("accent", metrics.turnsCount.toString())}`,
       `│    Tools: ${this.theme.fg("accent", metrics.toolsExecuted.toString())}`,
       `│    Errors: ${this.theme.fg(metrics.errorsCount > 0 ? "error" : "success", metrics.errorsCount.toString())}`,
       `│    Error Rate: ${this.theme.fg(parseFloat(errorRate) > 10 ? "error" : "success", errorRate + "%")}`,
     ];
+
+    if (contextUsage && contextUsage.percent !== null) {
+      lines.push(`│    Context: ${this.renderProgressBar(contextUsage.percent, 20)} ${Math.round(contextUsage.percent)}%`);
+    }
+
+    return lines;
+  }
+
+  private renderProgressBar(percent: number, width: number): string {
+    const filled = Math.round((percent / 100) * width);
+    const color = percent > 90 ? "error" : percent > 70 ? "warning" : "success";
+    const bar = "█".repeat(Math.max(0, filled)) + "░".repeat(Math.max(0, width - filled));
+    return this.theme.fg(color, bar);
   }
 
   renderToolsWidget(state: HUDState): string[] {
