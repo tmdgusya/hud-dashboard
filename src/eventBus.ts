@@ -147,6 +147,14 @@ class HUDEventBus {
       }
     });
 
+    // Custom event for inter-extension communication
+    (this.pi as any).on("workflow:status", async (event: { status: WorkflowStatus }) => {
+      if (event.status) {
+        hudActions.setWorkflowStatus(event.status);
+        this.emit("workflow:status", event);
+      }
+    });
+
     this.cleanupFns.push(() => {
       this.handlers.clear();
       this.buffer = [];

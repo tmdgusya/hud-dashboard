@@ -120,16 +120,28 @@ class HeartbeatMonitor {
   private missedBeats = 0;
   private maxMissedBeats = 3;
   private listeners: Array<(connected: boolean) => void> = [];
+  private unsubscribe: (() => void) | null = null;
 
   start(): void {
     if (this.interval) return;
+    this.lastHeartbeat = Date.now();
     this.interval = setInterval(() => this.check(), this.intervalMs);
+
+    this.unsubscribe = hudStore.subscribe((state) => {
+      if (state.lastHeartbeat > this.lastHeartbeat) {
+        this.beat();
+      }
+    });
   }
 
   stop(): void {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
+    }
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = null;
     }
   }
 
@@ -141,11 +153,11 @@ class HeartbeatMonitor {
 
   private check(): void {
     const elapsed = Date.now() - this.lastHeartbeat;
-    // Allow for some jitter, check if we missed more than 3 intervals
-    if (elapsed > this.intervalMs * 3) {
+    // Allow for some jitter
+    if (elapsed > this.intervalMs * 2) {
       this.missedBeats = Math.floor(elapsed / this.intervalMs);
       if (this.missedBeats >= this.maxMissedBeats) {
-        console.warn(`[HUD Heartbeat] Connection lost (${this.missedBeats} missed, elapsed: ${Math.round(elapsed/1000)}s)`);
+        console.warn(`[HUD Heartbeat] Connection lost (${this.missedBeats} missed, last beat: ${new Date(this.lastHeartbeat).toLocaleTimeString()})`);
         this.notifyListeners(false);
       }
     } else {
@@ -267,9 +279,8 @@ export function getReconciliationStatus(): {
 export function initStateSync(pi: ExtensionAPI): void {
   heartbeatMonitor.start();
 
-  hudEventBus.subscribe("heartbeat", () => {
-    heartbeatMonitor.beat();
-    hudActions.setProviderConnected(true);
+  heartbeatMonitor.onStatusChange((connected) => {
+    hudActions.setProviderConnected(connected);
   });
 
   hudEventBus.subscribe("workflow:end", () => { forceSync(); });
@@ -283,8 +294,4 @@ export function initStateSync(pi: ExtensionAPI): void {
     optimisticManager.rollbackAll();
     reconciler.cancel();
   });
-
-  setInterval(() => {
-    if (!heartbeatMonitor.isHealthy()) hudActions.setProviderConnected(false);
-  }, 10000);
 }

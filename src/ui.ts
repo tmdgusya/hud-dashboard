@@ -105,6 +105,7 @@ export class HUDDashboardRenderer {
 
     lines.push(this.theme.fg("accent", "╭─ HUD Dashboard ──────────────────────────────╮"));
     lines.push(...this.renderStatusBar(state));
+    lines.push(...this.renderPermanentContext(state));
 
     for (const widgetId of widgetRegistry.getVisibleWidgets()) {
       const arrow = widgetRegistry.isCollapsed(widgetId) ? "▶" : "▼";
@@ -134,16 +135,15 @@ export class HUDDashboardRenderer {
       ? this.theme.fg("success", "●")
       : this.theme.fg("error", "○");
 
-    let contextBar = "";
-    if (state.contextUsage && state.contextUsage.percent !== null) {
-      const { percent } = state.contextUsage;
-      const color = percent > 90 ? "error" : percent > 70 ? "warning" : "success";
-      const filled = Math.round((percent / 100) * 10);
-      const bar = "█".repeat(filled).padEnd(10, "░");
-      contextBar = `  Ctx: [${this.theme.fg(color, bar)}]`;
-    }
+    return [`│  ${spinner} ${statusIcon} ${statusText}    ${connIcon} Connected`];
+  }
 
-    return [`│  ${spinner} ${statusIcon} ${statusText}    ${connIcon} Connected${contextBar}`];
+  private renderPermanentContext(state: HUDState): string[] {
+    if (!state.contextUsage || state.contextUsage.percent === null) return [];
+    
+    const { percent } = state.contextUsage;
+    const bar = this.renderProgressBar(percent, 24);
+    return [`│  Context: ${bar} ${Math.round(percent)}%`];
   }
 
   renderStatusWidget(state: HUDState): string[] {
@@ -163,21 +163,15 @@ export class HUDDashboardRenderer {
   }
 
   renderMetricsWidget(state: HUDState): string[] {
-    const { metrics, contextUsage } = state;
+    const { metrics } = state;
     const errorRate = hudSelectors.getErrorRate();
 
-    const lines = [
+    return [
       `│    Turns: ${this.theme.fg("accent", metrics.turnsCount.toString())}`,
       `│    Tools: ${this.theme.fg("accent", metrics.toolsExecuted.toString())}`,
       `│    Errors: ${this.theme.fg(metrics.errorsCount > 0 ? "error" : "success", metrics.errorsCount.toString())}`,
       `│    Error Rate: ${this.theme.fg(parseFloat(errorRate) > 10 ? "error" : "success", errorRate + "%")}`,
     ];
-
-    if (contextUsage && contextUsage.percent !== null) {
-      lines.push(`│    Context: ${this.renderProgressBar(contextUsage.percent, 20)} ${Math.round(contextUsage.percent)}%`);
-    }
-
-    return lines;
   }
 
   private renderProgressBar(percent: number, width: number): string {
