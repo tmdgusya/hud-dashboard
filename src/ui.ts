@@ -214,6 +214,7 @@ let unsubscribe: (() => void) | null = null;
 let currentRenderer: HUDDashboardRenderer | null = null;
 let currentTheme: Theme | null = null;
 let currentWidth = 80;
+let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
 export function initHUD(pi: ExtensionAPI): void {
   widgetRegistry.registerRenderer("status", (state, theme, width) =>
@@ -231,7 +232,10 @@ export function initHUD(pi: ExtensionAPI): void {
       .map(line => `│    ${theme.fg("muted", sanitizeForDisplay(line).slice(0, 40))}`);
   });
 
-  setInterval(() => { emitHeartbeat(); }, 30000);
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(() => {
+    emitHeartbeat();
+  }, 10000);
 }
 
 export function setupHUDWidget(ctx: any): void {
@@ -255,6 +259,7 @@ export function setHUDTheme(theme: Theme, width: number): void {
 
 export function destroyHUD(): void {
   if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
   currentRenderer = null;
   currentTheme = null;
 }

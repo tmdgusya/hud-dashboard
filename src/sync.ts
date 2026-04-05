@@ -141,10 +141,11 @@ class HeartbeatMonitor {
 
   private check(): void {
     const elapsed = Date.now() - this.lastHeartbeat;
-    if (elapsed > this.intervalMs * 2) {
-      this.missedBeats++;
+    // Allow for some jitter, check if we missed more than 3 intervals
+    if (elapsed > this.intervalMs * 3) {
+      this.missedBeats = Math.floor(elapsed / this.intervalMs);
       if (this.missedBeats >= this.maxMissedBeats) {
-        console.warn(`[HUD Heartbeat] Connection lost (${this.missedBeats} missed)`);
+        console.warn(`[HUD Heartbeat] Connection lost (${this.missedBeats} missed, elapsed: ${Math.round(elapsed/1000)}s)`);
         this.notifyListeners(false);
       }
     } else {

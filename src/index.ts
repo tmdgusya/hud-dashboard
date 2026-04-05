@@ -101,6 +101,8 @@ export default function hudDashboardExtension(pi: ExtensionAPI): void {
 
   pi.on("session_shutdown", () => {
     forceSync();
+    destroyHUD();
+    destroyHUDDashboard();
     logSecurityEvent("permission_revoked", "Session shutdown", "low");
     optimisticManager.rollbackAll();
   });
